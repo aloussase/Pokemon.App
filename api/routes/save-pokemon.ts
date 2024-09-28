@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import { Database } from "../config/db";
 import { pokemon, users } from "../database/schemas";
 import { validateRequired } from "../util";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 
 export const savePokemon =
   (db: Database) =>
@@ -24,6 +24,28 @@ export const savePokemon =
     const user = await db.query.users.findFirst({
       where: eq(users.username, req.username!),
     });
+
+    const existingPokemon = await db
+      .select({
+        id: pokemon.id,
+        types: pokemon.types,
+        name: pokemon.name,
+        imageUrl: pokemon.imageUrl,
+        userId: users.id,
+      })
+      .from(users)
+      .innerJoin(pokemon, eq(users.id, pokemon.userId))
+      .where(
+        and(eq(users.username, user!.username), eq(pokemon.id, pokemonId))
+      );
+
+    if (existingPokemon.length > 0) {
+      console.log("Pokemon already saved as a favorite");
+      return res.status(200).json({
+        status: "success",
+        data: { ...existingPokemon[0] },
+      });
+    }
 
     const response = await fetch(
       `https://pokeapi.co/api/v2/pokemon/${pokemonId}/`
