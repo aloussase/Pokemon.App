@@ -3,10 +3,14 @@ import "package:http/http.dart" as http;
 import 'package:http/http.dart';
 
 import '../data/repository/auth_repository_impl.dart';
+import '../data/repository/pokemon_repository_impl.dart';
 import '../domain/repository/auth_repository.dart';
+import '../domain/repository/pokemon_repository.dart';
+import '../domain/use_case/get_pokemon_use_case.dart';
 import '../domain/use_case/login_use_case.dart';
 import '../domain/use_case/register_use_case.dart';
 import '../ui/viewmodel/auth_view_model.dart';
+import '../ui/viewmodel/home_view_model.dart';
 import '../ui/viewmodel/login_view_model.dart';
 import '../ui/viewmodel/register_view_model.dart';
 import '../ui/viewmodel/snackbar_view_model.dart';
@@ -31,4 +35,8 @@ void setup() {
   getIt.registerLazySingleton<AuthViewModel>(
     () => AuthViewModel(authRepository: getIt()),
   );
+
+  getIt.registerSingleton<PokemonRepository>(PokemonRepositoryImpl(getIt()));
+  getIt.registerSingleton(GetPokemonUseCase(getIt()));
+  getIt.registerSingleton(HomeViewModel(getIt(), getIt()));
 }

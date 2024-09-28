@@ -20,9 +20,9 @@ import { getPokemon } from "./routes/get-pokemon";
   app.post("/api/pokemon", protect, savePokemon(db));
   app.get("/api/pokemon", protect, getPokemon(db));
 
-  const port = process.env.PORT || 3000;
+  const port = parseInt(process.env.PORT || '3000');
 
-  app.listen(port, () =>
+  app.listen(port, '0.0.0.0', () =>
     console.table({
       port,
     })

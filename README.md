@@ -43,3 +43,7 @@ node build/index.js
 Si va a utlizar la base de datos mediante docker-compose, puede dejar los valores por defecto.
 
 ### Aplicación Móvil
+
+Se explicarán los pasos de instalación para dispositivos Android ya que no cuento con un dispositivo IOS para probarlo.
+
+Deberá tener Java 17 instalado para que la generación del APK sea exitosa.

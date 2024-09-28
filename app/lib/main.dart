@@ -1,6 +1,3 @@
-import './ui/pages/splash_page.dart';
-import './ui/viewmodel/login_view_model.dart';
-import './ui/viewmodel/register_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -8,7 +5,10 @@ import './di/init.dart' as di;
 import './domain/repository/auth_repository.dart';
 import './ui/pages/home_page.dart';
 import './ui/pages/login_page.dart';
+import './ui/pages/splash_page.dart';
 import './ui/viewmodel/auth_view_model.dart';
+import './ui/viewmodel/login_view_model.dart';
+import './ui/viewmodel/register_view_model.dart';
 import './ui/viewmodel/snackbar_view_model.dart';
 
 void main() {
