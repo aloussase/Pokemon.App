@@ -1,4 +1,4 @@
-import '../../domain/models/Pokemon.dart';
+import '../../domain/models/pokemon.dart';
 import '../../domain/repository/pokemon_repository.dart';
 
 final class GetPokemonUseCase {

@@ -6,12 +6,14 @@ import '../data/repository/auth_repository_impl.dart';
 import '../data/repository/pokemon_repository_impl.dart';
 import '../domain/repository/auth_repository.dart';
 import '../domain/repository/pokemon_repository.dart';
+import '../domain/use_case/get_pokemon_details_use_case.dart';
 import '../domain/use_case/get_pokemon_use_case.dart';
 import '../domain/use_case/login_use_case.dart';
 import '../domain/use_case/register_use_case.dart';
 import '../ui/viewmodel/auth_view_model.dart';
 import '../ui/viewmodel/home_view_model.dart';
 import '../ui/viewmodel/login_view_model.dart';
+import '../ui/viewmodel/pokemon_details_view_model.dart';
 import '../ui/viewmodel/register_view_model.dart';
 import '../ui/viewmodel/snackbar_view_model.dart';
 
@@ -39,4 +41,7 @@ void setup() {
   getIt.registerSingleton<PokemonRepository>(PokemonRepositoryImpl(getIt()));
   getIt.registerSingleton(GetPokemonUseCase(getIt()));
   getIt.registerSingleton(HomeViewModel(getIt(), getIt()));
+
+  getIt.registerSingleton(GetPokemonDetailsUseCase(getIt()));
+  getIt.registerSingleton(PokemonDetailsViewModel(getIt()));
 }

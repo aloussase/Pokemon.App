@@ -1,6 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../domain/models/Pokemon.dart';
+import '../../domain/models/pokemon.dart';
 import '../../domain/repository/pokemon_repository.dart';
 import '../../domain/use_case/get_pokemon_use_case.dart';
 
