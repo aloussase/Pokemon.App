@@ -5,8 +5,11 @@ create table users (
 );
 
 create table pokemon (
-    pokemon_id integer not null,
+    id integer not null,
     user_id integer not null
         references users (id)
-            on delete cascade
+            on delete cascade,
+    image_url text not null,
+    name text not null,
+    types text not null
 );

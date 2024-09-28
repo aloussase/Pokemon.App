@@ -1,6 +1,6 @@
 export const validateRequired = <
-  TKeys extends string[],
-  TData extends Record<TKeys[number], any>
+  TData extends Record<string, any>,
+  TKeys extends readonly (keyof TData)[]
 >(
   keys: { key: TKeys[number]; name: string }[],
   data: TData

@@ -16,7 +16,12 @@ export const createToken = async <TData extends Record<string, any>>(
   });
 };
 
-export const verifyToken = async <TData>(token: string) => {
-  const data = jwt.verify(token, secret);
-  return data;
+export const verifyToken = async <TData>(
+  token: string
+): Promise<{ username: string } | null> => {
+  const result = jwt.verify(token, secret);
+  if (result instanceof String) {
+    return null;
+  }
+  return { username: result.sub as string };
 };
