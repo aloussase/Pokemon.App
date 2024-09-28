@@ -43,5 +43,5 @@ void setup() {
   getIt.registerSingleton(HomeViewModel(getIt(), getIt()));
 
   getIt.registerSingleton(GetPokemonDetailsUseCase(getIt()));
-  getIt.registerSingleton(PokemonDetailsViewModel(getIt()));
+  getIt.registerFactory(() => PokemonDetailsViewModel(getIt()));
 }

@@ -23,33 +23,45 @@ final class PokemonRepositoryImpl extends PokemonRepository {
 
   static const POKEAPI_DETAILS_ENDPOINT = "https://pokeapi.co/api/v2/pokemon/";
 
-  static const POKEAPI_EVOLUTION_ENDPOINT =
-      "https://pokeapi.co/api/v2/evolution-chain/";
+  static const POKEAPI_SPECIES_ENDPOINT =
+      "https://pokeapi.co/api/v2/pokemon-species/";
 
   @override
   Future<void> loadPokemon() async {
-    final response = await _client.get(Uri.parse(POKEAPI_POKEMON_ENDPOINT));
-    final List<Future<Response>> requests = [];
-    if (response.statusCode >= 200 && response.statusCode < 300) {
-      final json = jsonDecode(response.body);
-      final List<dynamic> results = json["results"];
-      for (final item in results) {
-        final name = item["name"];
-        requests.add(_client.get(Uri.parse(POKEAPI_DETAILS_ENDPOINT + name)));
-      }
-    }
-    final responses = await Future.wait(requests);
-    final pokemon = <Pokemon>[];
-    for (final response in responses) {
+    try {
+      final response = await _client
+          .get(Uri.parse(POKEAPI_POKEMON_ENDPOINT))
+          .timeout(const Duration(seconds: 10));
+      final List<Future<Response>> requests = [];
       if (response.statusCode >= 200 && response.statusCode < 300) {
         final json = jsonDecode(response.body);
-        final name = json["name"];
-        final imageUrl =
-            json["sprites"]["other"]["official-artwork"]["front_default"];
-        pokemon.add(Pokemon(name, imageUrl));
+        final List<dynamic> results = json["results"];
+        for (final item in results) {
+          final name = item["name"];
+          requests.add(
+            _client
+                .get(Uri.parse(POKEAPI_DETAILS_ENDPOINT + name))
+                .timeout(const Duration(seconds: 10)),
+          );
+        }
+      }
+      final responses = await Future.wait(requests);
+      final pokemon = <Pokemon>[];
+      for (final response in responses) {
+        if (response.statusCode >= 200 && response.statusCode < 300) {
+          final json = jsonDecode(response.body);
+          final name = json["name"];
+          final imageUrl =
+              json["sprites"]["other"]["official-artwork"]["front_default"];
+          pokemon.add(Pokemon(name, imageUrl));
+        }
+      }
+      _controller.add(pokemon);
+    } catch (ex) {
+      if (ex is! TimeoutException) {
+        rethrow;
       }
     }
-    _controller.add(pokemon);
   }
 
   @override
@@ -82,10 +94,29 @@ final class PokemonRepositoryImpl extends PokemonRepository {
         )
         .toList();
 
+    final evolutions = await _getEvolutionChain(name);
+
+    return PokemonDetails(
+      name: json["name"],
+      imageUrl: imageUrl,
+      types: types,
+      abilities: abilities,
+      stats: stats,
+      evolutions: evolutions,
+    );
+  }
+
+  Future<List<String>> _getEvolutionChain(String name) async {
     List<String> evolutions = [];
 
-    var evolutionsResponse = await _client
-        .get(Uri.parse(POKEAPI_EVOLUTION_ENDPOINT + json["id"].toString()));
+    final uri = Uri.parse(POKEAPI_SPECIES_ENDPOINT + name);
+    final response = await _client.get(uri);
+    final json = jsonDecode(response.body);
+
+    print(json);
+
+    final evolutionChainUrl = json["evolution_chain"]["url"];
+    final evolutionsResponse = await _client.get(Uri.parse(evolutionChainUrl));
 
     Map<String, dynamic> evolutionsJson = jsonDecode(evolutionsResponse.body);
     List<dynamic> evolvesTo = evolutionsJson["chain"]["evolves_to"];
@@ -96,13 +127,6 @@ final class PokemonRepositoryImpl extends PokemonRepository {
       evolvesTo = evolvesTo[0]["evolves_to"];
     }
 
-    return PokemonDetails(
-      name: json["name"],
-      imageUrl: imageUrl,
-      types: types,
-      abilities: abilities,
-      stats: stats,
-      evolutions: evolutions,
-    );
+    return evolutions;
   }
 }

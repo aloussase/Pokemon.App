@@ -22,7 +22,14 @@ class _HomePageState extends State<HomePage> {
           builder: (context, state) {
             if (state.status == HomeStatus.loading) {
               return const Center(
-                child: CircularProgressIndicator(),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    CircularProgressIndicator(),
+                    Text("Cargando Pokemon"),
+                  ],
+                ),
               );
             }
 
@@ -39,6 +46,22 @@ class _HomePageState extends State<HomePage> {
                         color: Theme.of(context).primaryColor,
                       ),
                     ),
+                    if (state.pokemon.isEmpty)
+                      Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            const Text("No hay Pokemon que mostrar"),
+                            ElevatedButton(
+                              onPressed: () => context
+                                  .read<HomeViewModel>()
+                                  .add(OnPokemonListSubscriptionRequested()),
+                              child: const Text("Recargar"),
+                            )
+                          ],
+                        ),
+                      ),
                     for (final pokemon in state.pokemon)
                       GestureDetector(
                         onTap: () {

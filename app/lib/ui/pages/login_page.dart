@@ -17,8 +17,8 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  late final StreamSubscription _snackbarSubscription;
   late final StreamSubscription _errorsSubscription;
+  late final StreamSubscription<String> _snackbarSubscription;
 
   @override
   void initState() {
@@ -27,21 +27,28 @@ class _LoginPageState extends State<LoginPage> {
     final loginViewModel = context.read<LoginViewModel>();
     final snackbarViewModel = context.read<SnackbarViewModel>();
 
-    _snackbarSubscription = snackbarViewModel.messages.listen((message) {
-      final snackbar = SnackBar(content: Text(message));
-      ScaffoldMessenger.of(context).hideCurrentSnackBar();
-      ScaffoldMessenger.of(context).showSnackBar(snackbar);
-    });
+    _snackbarSubscription = snackbarViewModel.messages.listen(
+      (message) {
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(
+            SnackBar(
+              content: Text(message),
+            ),
+          );
+      },
+    );
 
-    _errorsSubscription = loginViewModel.errors.listen((error) {
-      snackbarViewModel.add(OnSnackbarMessage(message: error));
-    });
+    _errorsSubscription = loginViewModel.errors.listen(
+      (error) {
+        snackbarViewModel.add(OnSnackbarMessage(message: error));
+      },
+    );
   }
 
   @override
   void dispose() {
     super.dispose();
-
     _snackbarSubscription.cancel();
     _errorsSubscription.cancel();
   }

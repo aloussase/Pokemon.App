@@ -39,13 +39,31 @@ final class OnLoadPokemonDetails extends PokemonDetailsEvent {
   OnLoadPokemonDetails(this.name);
 }
 
+final class OnEvolve extends PokemonDetailsEvent {}
+
+sealed class PokemonDetailsUiEvent {}
+
+final class OnEvolved extends PokemonDetailsUiEvent {
+  final String name;
+
+  OnEvolved(this.name);
+}
+
+final class OnUnableToEvolve extends PokemonDetailsUiEvent {}
+
 final class PokemonDetailsViewModel
     extends Bloc<PokemonDetailsEvent, PokemonDetailsState> {
   final GetPokemonDetailsUseCase _getPokemonDetails;
 
+  final StreamController<PokemonDetailsUiEvent> _controller =
+      StreamController();
+
+  Stream<PokemonDetailsUiEvent> get uiEvents => _controller.stream;
+
   PokemonDetailsViewModel(this._getPokemonDetails)
       : super(PokemonDetailsState.empty()) {
     on<OnLoadPokemonDetails>(_onLoadPokemonDetails);
+    on<OnEvolve>(_onEvolve);
   }
 
   FutureOr<void> _onLoadPokemonDetails(
@@ -58,6 +76,33 @@ final class PokemonDetailsViewModel
       state.copyWith(
         status: PokemonDetailsStatus.success,
         pokemon: pokemon,
+      ),
+    );
+  }
+
+  FutureOr<void> _onEvolve(
+    OnEvolve event,
+    Emitter<PokemonDetailsState> emit,
+  ) async {
+    if (state.pokemon == null) return;
+
+    final pokemon = state.pokemon!;
+    final evolutions = pokemon.evolutions;
+    final index = evolutions.indexOf(pokemon.name);
+
+    if (index == -1) {
+      return;
+    }
+
+    if (index + 1 >= evolutions.length) {
+      return _controller.add(
+        OnUnableToEvolve(),
+      );
+    }
+
+    _controller.add(
+      OnEvolved(
+        evolutions[index + 1],
       ),
     );
   }
