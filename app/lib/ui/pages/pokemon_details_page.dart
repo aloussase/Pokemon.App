@@ -59,6 +59,19 @@ final class _PokemonDetailsPageState extends State<PokemonDetailsPage> {
                 Navigator.of(context).push(PokemonDetailsPage.route(name));
               },
             );
+          case OnError():
+            snackbarViewModel.add(
+              OnSnackbarMessage(
+                message: event.message,
+              ),
+            );
+          case OnAddedToFavorites():
+            snackbarViewModel.add(
+              OnSnackbarMessage(
+                message:
+                    "${event.name} ha sido añadido a tu lista de favoritos",
+              ),
+            );
         }
       },
     );
@@ -159,13 +172,29 @@ final class _PokemonDetailsPageState extends State<PokemonDetailsPage> {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          state.pokemon!.name.toUpperCase(),
-                          style: TextStyle(
-                            color: Theme.of(context).primaryColor,
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                          ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              state.pokemon!.name.toUpperCase(),
+                              style: TextStyle(
+                                color: Theme.of(context).primaryColor,
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            IconButton(
+                              onPressed: () {
+                                context
+                                    .read<PokemonDetailsViewModel>()
+                                    .add(OnStar());
+                              },
+                              icon: const Icon(
+                                Icons.favorite,
+                                color: Colors.red,
+                              ),
+                            )
+                          ],
                         ),
                         Types(types: state.pokemon!.types),
                         const SizedBox(height: 4),

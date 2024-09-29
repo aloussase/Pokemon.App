@@ -101,6 +101,7 @@ final class PokemonRepositoryImpl extends PokemonRepository {
     final evolutions = await _getEvolutionChain(name);
 
     return PokemonDetails(
+      id: json["id"],
       name: json["name"],
       imageUrl: imageUrl,
       types: types,
@@ -203,8 +204,25 @@ final class PokemonRepositoryImpl extends PokemonRepository {
   }
 
   @override
-  Future<void> saveFavoritePokemon(int pokemonId) {
-    // TODO: implement saveFavoritePokemon
-    throw UnimplementedError();
+  Future<void> saveFavoritePokemon(int pokemonId) async {
+    final accessToken = AuthenticationTokenHolder.the().token;
+    if (accessToken == null) {
+      throw Exception("El usuario no se encuentra autenticado");
+    }
+
+    final response = await _client.post(
+      Uri.parse("$API_BASE_URL/api/pokemon"),
+      headers: {
+        'Authorization': 'Bearer $accessToken',
+        'Content-Type': 'application/json'
+      },
+      body: jsonEncode({'pokemonId': pokemonId}),
+    );
+
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      final jsonBody = jsonDecode(response.body);
+      final error = jsonBody["errors"][0];
+      throw Exception(error);
+    }
   }
 }

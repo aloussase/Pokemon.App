@@ -10,6 +10,7 @@ import '../domain/use_case/get_pokemon_details_use_case.dart';
 import '../domain/use_case/get_pokemon_use_case.dart';
 import '../domain/use_case/login_use_case.dart';
 import '../domain/use_case/register_use_case.dart';
+import '../domain/use_case/star_pokemon_use_case.dart';
 import '../ui/viewmodel/auth_view_model.dart';
 import '../ui/viewmodel/favorite_pokemon_view_model.dart';
 import '../ui/viewmodel/home_view_model.dart';
@@ -44,7 +45,8 @@ void setup() {
   getIt.registerFactory(() => HomeViewModel(getIt(), getIt()));
 
   getIt.registerSingleton(GetPokemonDetailsUseCase(getIt()));
-  getIt.registerFactory(() => PokemonDetailsViewModel(getIt()));
+  getIt.registerSingleton(StarPokemonUseCase(getIt()));
+  getIt.registerFactory(() => PokemonDetailsViewModel(getIt(), getIt()));
 
   getIt.registerFactory(() => FavoritePokemonViewModel(getIt()));
 }
