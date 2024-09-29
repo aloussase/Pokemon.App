@@ -20,17 +20,32 @@ final class OnPasswordChanged extends RegisterEvent {
 
 final class OnRegister extends RegisterEvent {}
 
+enum RegisterStatus {
+  initial,
+  loading,
+  success,
+  error,
+}
+
 final class RegisterState {
   final String username;
   final String password;
+  final RegisterStatus status;
 
-  RegisterState(this.username, this.password);
+  RegisterState(this.username, this.password, this.status);
 
-  factory RegisterState.empty() => RegisterState("", "");
+  factory RegisterState.empty() =>
+      RegisterState("", "", RegisterStatus.initial);
 
-  RegisterState copyWith({String? username, String? password}) => RegisterState(
+  RegisterState copyWith({
+    String? username,
+    String? password,
+    RegisterStatus? status,
+  }) =>
+      RegisterState(
         username ?? this.username,
         password ?? this.password,
+        status ?? this.status,
       );
 }
 
@@ -60,10 +75,14 @@ final class RegisterViewModel extends Bloc<RegisterEvent, RegisterState> {
     final username = state.username;
     final password = state.password;
 
+    emit(state.copyWith(status: RegisterStatus.loading));
     final result = await _register(username, password);
 
     if (result != null) {
       _errors.add(result.message);
+      emit(state.copyWith(status: RegisterStatus.error));
+    } else {
+      emit(state.copyWith(status: RegisterStatus.success));
     }
   }
 
