@@ -113,13 +113,13 @@ final class PokemonRepositoryImpl extends PokemonRepository {
     final response = await _client.get(uri);
     final json = jsonDecode(response.body);
 
-    print(json);
-
     final evolutionChainUrl = json["evolution_chain"]["url"];
     final evolutionsResponse = await _client.get(Uri.parse(evolutionChainUrl));
 
     Map<String, dynamic> evolutionsJson = jsonDecode(evolutionsResponse.body);
     List<dynamic> evolvesTo = evolutionsJson["chain"]["evolves_to"];
+
+    evolutions.add(evolutionsJson["chain"]["species"]["name"]);
 
     while (evolvesTo.isNotEmpty) {
       final species = evolvesTo[0]["species"]["name"];

@@ -47,7 +47,15 @@ final class _PokemonDetailsPageState extends State<PokemonDetailsPage> {
               ),
             );
           case OnEvolved(name: final name):
-            Navigator.of(context).push(PokemonDetailsPage.route(name));
+            snackbarViewModel.add(
+              OnSnackbarMessage(message: "¡El Pokemon va a evolucionar!"),
+            );
+            Future.delayed(
+              const Duration(seconds: 2),
+              () {
+                Navigator.of(context).push(PokemonDetailsPage.route(name));
+              },
+            );
         }
       },
     );
