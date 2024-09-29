@@ -63,6 +63,11 @@ class _LoginPageState extends State<LoginPage> {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
+              const Image(
+                image: AssetImage("assets/pokeball.png"),
+                height: 100,
+              ),
+              const SizedBox(height: 20),
               const Center(
                 child: Text(
                   "Iniciar sesión",
