@@ -9,6 +9,7 @@ import '../../domain/models/pokemon.dart';
 import '../../domain/models/pokemon_stat.dart';
 import '../viewmodel/pokemon_details_view_model.dart';
 import '../viewmodel/snackbar_view_model.dart';
+import '../widgets/bottom_navigation.dart';
 
 final class PokemonDetailsPage extends StatefulWidget {
   String name;
@@ -103,9 +104,10 @@ final class _PokemonDetailsPageState extends State<PokemonDetailsPage> {
         }
 
         return Scaffold(
+          bottomNavigationBar: const BottomNavigation(),
           bottomSheet: BottomSheet(
             constraints: const BoxConstraints(
-              maxHeight: 400,
+              maxHeight: 350,
             ),
             enableDrag: false,
             shape: const RoundedRectangleBorder(
@@ -152,6 +154,7 @@ final class _PokemonDetailsPageState extends State<PokemonDetailsPage> {
                 padding: const EdgeInsets.all(20),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -169,7 +172,13 @@ final class _PokemonDetailsPageState extends State<PokemonDetailsPage> {
                         Abilities(abilities: state.pokemon!.abilities),
                       ],
                     ),
-                    Image(image: NetworkImage(state.pokemon!.imageUrl)),
+                    Center(
+                      child: Image(
+                        image: NetworkImage(state.pokemon!.imageUrl),
+                        height: 300,
+                        alignment: Alignment.center,
+                      ),
+                    ),
                   ],
                 ),
               ),

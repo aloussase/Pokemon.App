@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:math';
 
 import 'package:http/http.dart';
 
@@ -11,7 +12,8 @@ import '../../domain/repository/pokemon_repository.dart';
 final class PokemonRepositoryImpl extends PokemonRepository {
   final Client _client;
 
-  final StreamController<List<Pokemon>> _controller = StreamController();
+  final StreamController<List<Pokemon>> _controller =
+      StreamController.broadcast();
 
   @override
   Stream<List<Pokemon>> get pokemon => _controller.stream;
@@ -29,8 +31,9 @@ final class PokemonRepositoryImpl extends PokemonRepository {
   @override
   Future<void> loadPokemon() async {
     try {
+      final offset = Random().nextInt(700);
       final response = await _client
-          .get(Uri.parse(POKEAPI_POKEMON_ENDPOINT))
+          .get(Uri.parse("$POKEAPI_POKEMON_ENDPOINT&offset=$offset"))
           .timeout(const Duration(seconds: 10));
       final List<Future<Response>> requests = [];
       if (response.statusCode >= 200 && response.statusCode < 300) {

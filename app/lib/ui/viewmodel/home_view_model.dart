@@ -38,12 +38,13 @@ final class HomeViewModel extends Bloc<HomeEvent, HomeState> {
   HomeViewModel(this._getPokemon, this._pokemon) : super(HomeState.empty()) {
     on<OnPokemonListSubscriptionRequested>((evt, emit) async {
       emit(state.copyWith(status: HomeStatus.loading));
-      await _pokemon.loadPokemon();
-      emit(state.copyWith(status: HomeStatus.success));
-      await emit.forEach(
+      final subscription = emit.forEach(
         _getPokemon(),
         onData: (pokemon) => state.copyWith(pokemon: pokemon),
       );
+      await _pokemon.loadPokemon();
+      emit(state.copyWith(status: HomeStatus.success));
+      return subscription;
     });
   }
 }

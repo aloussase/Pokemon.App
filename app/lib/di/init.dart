@@ -40,7 +40,7 @@ void setup() {
 
   getIt.registerSingleton<PokemonRepository>(PokemonRepositoryImpl(getIt()));
   getIt.registerSingleton(GetPokemonUseCase(getIt()));
-  getIt.registerSingleton(HomeViewModel(getIt(), getIt()));
+  getIt.registerFactory(() => HomeViewModel(getIt(), getIt()));
 
   getIt.registerSingleton(GetPokemonDetailsUseCase(getIt()));
   getIt.registerFactory(() => PokemonDetailsViewModel(getIt()));
