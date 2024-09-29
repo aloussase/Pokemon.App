@@ -1,9 +1,11 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../di/init.dart';
+import '../../domain/models/pokemon.dart';
 import '../../domain/models/pokemon_stat.dart';
 import '../viewmodel/pokemon_details_view_model.dart';
 import '../viewmodel/snackbar_view_model.dart';
@@ -82,57 +84,99 @@ final class _PokemonDetailsPageState extends State<PokemonDetailsPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: BlocBuilder<PokemonDetailsViewModel, PokemonDetailsState>(
-        builder: (context, state) {
-          if (state.status == PokemonDetailsStatus.loading ||
-              state.status == PokemonDetailsStatus.initial) {
-            return const Center(
-              child: CircularProgressIndicator(),
-            );
-          }
+    return BlocBuilder<PokemonDetailsViewModel, PokemonDetailsState>(
+      builder: (context, state) {
+        if (state.status == PokemonDetailsStatus.loading ||
+            state.status == PokemonDetailsStatus.initial) {
+          return const Scaffold(
+            body: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  CircularProgressIndicator(),
+                  Text("Cargando información del Pokemon")
+                ],
+              ),
+            ),
+          );
+        }
 
-          return SafeArea(
+        return Scaffold(
+          bottomSheet: BottomSheet(
+            constraints: const BoxConstraints(
+              maxHeight: 400,
+            ),
+            enableDrag: false,
+            shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.vertical(
+                top: Radius.circular(20),
+              ),
+            ),
+            onClosing: () {},
+            builder: (BuildContext context) {
+              return DefaultTabController(
+                length: 2,
+                child: Column(
+                  children: [
+                    const TabBar(
+                      tabs: [
+                        Tab(text: "Estadísticas"),
+                        Tab(text: "Evoluciones"),
+                      ],
+                    ),
+                    SizedBox(
+                      height: 300,
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: TabBarView(
+                          children: [
+                            Stats(
+                              stats: state.pokemon!.stats,
+                            ),
+                            EvolutionChain(
+                              evolutions: state.pokemon!.evolutions,
+                            )
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+          body: SafeArea(
             child: SingleChildScrollView(
               child: Padding(
                 padding: const EdgeInsets.all(20),
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Image(image: NetworkImage(state.pokemon!.imageUrl)),
-                    Text(
-                      state.pokemon!.name.toUpperCase(),
-                      style: TextStyle(
-                        color: Theme.of(context).primaryColor,
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                      ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          state.pokemon!.name.toUpperCase(),
+                          style: TextStyle(
+                            color: Theme.of(context).primaryColor,
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Types(types: state.pokemon!.types),
+                        const SizedBox(height: 4),
+                        Abilities(abilities: state.pokemon!.abilities),
+                      ],
                     ),
-                    const SizedBox(height: 18),
-                    const Text("Tipos"),
-                    Types(types: state.pokemon!.types),
-                    const SizedBox(height: 18),
-                    const Text("Stats"),
-                    Stats(stats: state.pokemon!.stats),
-                    const SizedBox(height: 18),
-                    const Text("Habilidades"),
-                    Abilities(abilities: state.pokemon!.abilities),
-                    const SizedBox(height: 18),
-                    const Text("Línea evolutiva"),
-                    EvolutionChain(evolutions: state.pokemon!.evolutions),
-                    const SizedBox(height: 18),
-                    ElevatedButton(
-                      onPressed: () {
-                        context.read<PokemonDetailsViewModel>().add(OnEvolve());
-                      },
-                      child: const Text("Evolucionar"),
-                    )
+                    Image(image: NetworkImage(state.pokemon!.imageUrl)),
                   ],
                 ),
               ),
             ),
-          );
-        },
-      ),
+          ),
+        );
+      },
     );
   }
 }
@@ -147,16 +191,27 @@ class Types extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Wrap(
-      alignment: WrapAlignment.center,
-      spacing: 4,
+    return Row(
       children: [
-        for (final type in types)
-          Badge(
-            padding: const EdgeInsets.all(6),
-            label: Text(type),
-            backgroundColor: Theme.of(context).colorScheme.secondary,
-          )
+        const Text(
+          "Tipos",
+          style: TextStyle(
+            color: Colors.grey,
+          ),
+        ),
+        const SizedBox(width: 8),
+        Wrap(
+          alignment: WrapAlignment.center,
+          spacing: 4,
+          children: [
+            for (final type in types)
+              Badge(
+                padding: const EdgeInsets.all(6),
+                label: Text(type),
+                backgroundColor: Theme.of(context).colorScheme.secondary,
+              )
+          ],
+        ),
       ],
     );
   }
@@ -170,19 +225,52 @@ class Stats extends StatelessWidget {
     required this.stats,
   });
 
+  String _getStatName(String name) => switch (name) {
+        "hp" => "HP",
+        "attack" => "Ataque",
+        "defense" => "Defensa",
+        "special-attack" => "Ataque especial",
+        "special-defense" => "Defensa especial",
+        "speed" => "Velocidad",
+        _ => ""
+      };
+
+  Color _getStatColor(int value) => switch (value) {
+        < 50 => Colors.red,
+        _ => Colors.green,
+      };
+
   @override
   Widget build(BuildContext context) {
-    return Wrap(
-      alignment: WrapAlignment.center,
-      spacing: 4,
-      crossAxisAlignment: WrapCrossAlignment.center,
-      runSpacing: 4,
+    const maxWidth = 180;
+    final maxValue = stats.map((stat) => stat.value).reduce(max);
+    return GridView.count(
+      crossAxisCount: 2,
+      childAspectRatio: 4,
+      mainAxisSpacing: 2,
       children: [
-        for (final stat in stats)
-          Badge(
-            padding: const EdgeInsets.all(6),
-            label: Text("${stat.name} ${stat.value}"),
+        for (final stat in stats) ...[
+          Text(_getStatName(stat.name)),
+          Row(
+            children: [
+              Container(
+                width: maxWidth * (stat.value / maxValue),
+                height: 20,
+                decoration: BoxDecoration(
+                  color: _getStatColor(stat.value),
+                  borderRadius: const BorderRadius.all(
+                    Radius.circular(5),
+                  ),
+                ),
+                alignment: Alignment.center,
+                child: Text(
+                  stat.value.toString(),
+                  style: const TextStyle(color: Colors.white),
+                ),
+              ),
+            ],
           )
+        ]
       ],
     );
   }
@@ -198,23 +286,34 @@ class Abilities extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Wrap(
-      alignment: WrapAlignment.center,
-      spacing: 6,
+    return Row(
       children: [
-        for (final ability in abilities)
-          Badge(
-            padding: const EdgeInsets.all(6),
-            label: Text(ability),
-            backgroundColor: Theme.of(context).colorScheme.tertiary,
-          )
+        const Text(
+          "Habilidades",
+          style: TextStyle(
+            color: Colors.grey,
+          ),
+        ),
+        const SizedBox(width: 8),
+        Wrap(
+          alignment: WrapAlignment.center,
+          spacing: 6,
+          children: [
+            for (final ability in abilities)
+              Badge(
+                padding: const EdgeInsets.all(6),
+                label: Text(ability),
+                backgroundColor: Theme.of(context).colorScheme.tertiary,
+              )
+          ],
+        ),
       ],
     );
   }
 }
 
 class EvolutionChain extends StatelessWidget {
-  final List<String> evolutions;
+  final List<Pokemon> evolutions;
 
   const EvolutionChain({
     super.key,
@@ -223,19 +322,38 @@ class EvolutionChain extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
+    return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        for (final (ix, evo) in evolutions.indexed)
-          Row(
-            children: [
-              Text(evo.toUpperCase()),
-              const SizedBox(width: 5),
-              if (ix < evolutions.length - 1)
-                const Icon(Icons.arrow_right_alt_sharp),
-              const SizedBox(width: 5),
-            ],
-          )
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            for (final (ix, evo) in evolutions.indexed)
+              Row(
+                children: [
+                  Column(
+                    children: [
+                      Image(
+                        image: NetworkImage(evo.imageUrl),
+                        width: 85,
+                      ),
+                      Text(evo.name.toUpperCase())
+                    ],
+                  ),
+                  const SizedBox(width: 5),
+                  if (ix < evolutions.length - 1)
+                    const Icon(Icons.arrow_right_alt_sharp),
+                  const SizedBox(width: 5),
+                ],
+              ),
+          ],
+        ),
+        const SizedBox(height: 24),
+        ElevatedButton(
+          child: const Text("Evolucionar"),
+          onPressed: () =>
+              context.read<PokemonDetailsViewModel>().add(OnEvolve()),
+        )
       ],
     );
   }

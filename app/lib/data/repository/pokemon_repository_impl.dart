@@ -106,8 +106,8 @@ final class PokemonRepositoryImpl extends PokemonRepository {
     );
   }
 
-  Future<List<String>> _getEvolutionChain(String name) async {
-    List<String> evolutions = [];
+  Future<List<Pokemon>> _getEvolutionChain(String name) async {
+    List<Pokemon> evolutions = [];
 
     final uri = Uri.parse(POKEAPI_SPECIES_ENDPOINT + name);
     final response = await _client.get(uri);
@@ -119,14 +119,46 @@ final class PokemonRepositoryImpl extends PokemonRepository {
     Map<String, dynamic> evolutionsJson = jsonDecode(evolutionsResponse.body);
     List<dynamic> evolvesTo = evolutionsJson["chain"]["evolves_to"];
 
-    evolutions.add(evolutionsJson["chain"]["species"]["name"]);
+    name = evolutionsJson["chain"]["species"]["name"];
+    var imageUrl = await _getImageUrl(name);
+
+    if (imageUrl != null) {
+      evolutions.add(
+        Pokemon(
+          name,
+          imageUrl,
+        ),
+      );
+    }
 
     while (evolvesTo.isNotEmpty) {
-      final species = evolvesTo[0]["species"]["name"];
-      evolutions.add(species);
+      name = evolvesTo[0]["species"]["name"];
+      imageUrl = await _getImageUrl(name);
+      if (imageUrl != null) {
+        evolutions.add(
+          Pokemon(
+            name,
+            imageUrl,
+          ),
+        );
+      }
       evolvesTo = evolvesTo[0]["evolves_to"];
     }
 
     return evolutions;
+  }
+
+  Future<String?> _getImageUrl(String name) async {
+    try {
+      final response = await _client
+          .get(Uri.parse(POKEAPI_DETAILS_ENDPOINT + name))
+          .timeout(const Duration(seconds: 10));
+      final json = jsonDecode(response.body);
+      final imageUrl =
+          json["sprites"]["other"]["official-artwork"]["front_default"];
+      return imageUrl;
+    } catch (_) {
+      return null;
+    }
   }
 }

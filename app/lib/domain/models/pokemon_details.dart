@@ -1,3 +1,4 @@
+import 'pokemon.dart';
 import 'pokemon_stat.dart';
 
 final class PokemonDetails {
@@ -6,7 +7,7 @@ final class PokemonDetails {
   final List<String> types;
   final List<String> abilities;
   final List<PokemonStat> stats;
-  final List<String> evolutions;
+  final List<Pokemon> evolutions;
 
   PokemonDetails(
       {required this.name,

@@ -88,7 +88,7 @@ final class PokemonDetailsViewModel
 
     final pokemon = state.pokemon!;
     final evolutions = pokemon.evolutions;
-    final index = evolutions.indexOf(pokemon.name);
+    final index = evolutions.indexWhere((p) => p.name == pokemon.name);
 
     if (index == -1) {
       return;
@@ -102,7 +102,7 @@ final class PokemonDetailsViewModel
 
     _controller.add(
       OnEvolved(
-        evolutions[index + 1],
+        evolutions[index + 1].name,
       ),
     );
   }

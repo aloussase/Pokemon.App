@@ -38,14 +38,6 @@ class _HomePageState extends State<HomePage> {
               child: Scrollbar(
                 child: ListView(
                   children: [
-                    Text(
-                      "Pokemon",
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 24,
-                        color: Theme.of(context).primaryColor,
-                      ),
-                    ),
                     if (state.pokemon.isEmpty)
                       Center(
                         child: Column(
@@ -70,21 +62,25 @@ class _HomePageState extends State<HomePage> {
                           );
                         },
                         child: Card(
-                          child: Column(
-                            children: [
-                              Image(
-                                image: NetworkImage(pokemon.imageUrl),
-                                height: 200,
-                                fit: BoxFit.fitHeight,
-                              ),
-                              const Divider(),
-                              Text(
-                                pokemon.name.toUpperCase(),
-                                style: const TextStyle(
-                                  fontSize: 20,
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Column(
+                              children: [
+                                Image(
+                                  image: NetworkImage(pokemon.imageUrl),
+                                  height: 160,
+                                  fit: BoxFit.fitHeight,
                                 ),
-                              ),
-                            ],
+                                Text(
+                                  pokemon.name.toUpperCase(),
+                                  style: TextStyle(
+                                    fontSize: 20,
+                                    color:
+                                        Theme.of(context).colorScheme.primary,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       )
