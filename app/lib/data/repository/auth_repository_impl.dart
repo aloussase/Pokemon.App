@@ -16,66 +16,74 @@ final class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<Either<AuthError, String>> login(
       String username, String password) async {
-    final response = await _client.post(
-      Uri.parse("${Config.API_BASE_URL}/api/login"),
-      body: jsonEncode(
-        {
-          "username": username,
-          "password": password,
-        },
-      ),
-      headers: {'Content-Type': 'application/json'},
-    );
+    try {
+      final response = await _client.post(
+        Uri.parse("${Config.API_BASE_URL}/api/login"),
+        body: jsonEncode(
+          {
+            "username": username,
+            "password": password,
+          },
+        ),
+        headers: {'Content-Type': 'application/json'},
+      );
 
-    if (response.statusCode != 200) {
+      if (response.statusCode != 200) {
+        final jsonBody = jsonDecode(response.body);
+        final message = jsonBody["errors"][0];
+        return Either.left(AuthError(message));
+      }
+
       final jsonBody = jsonDecode(response.body);
-      final message = jsonBody["errors"][0];
-      return Either.left(AuthError(message));
+      final accessToken = jsonBody["data"]["accessToken"];
+
+      _controller.add(
+        Authenticated(
+          accessToken: accessToken,
+          username: username,
+        ),
+      );
+
+      return Either.right(accessToken);
+    } catch (_) {
+      return Either.left(AuthError("Hubo un error al intentar ingresar"));
     }
-
-    final jsonBody = jsonDecode(response.body);
-    final accessToken = jsonBody["data"]["accessToken"];
-
-    _controller.add(
-      Authenticated(
-        accessToken: accessToken,
-        username: username,
-      ),
-    );
-
-    return Either.right(accessToken);
   }
 
   @override
   Future<AuthError?> register(String username, String password) async {
-    final response = await _client.post(
-      Uri.parse("${Config.API_BASE_URL}/api/register"),
-      body: jsonEncode(
-        {
-          "username": username,
-          "password": password,
-        },
-      ),
-      headers: {'Content-Type': 'application/json'},
-    );
+    try {
+      final response = await _client.post(
+        Uri.parse("${Config.API_BASE_URL}/api/register"),
+        body: jsonEncode(
+          {
+            "username": username,
+            "password": password,
+          },
+        ),
+        headers: {'Content-Type': 'application/json'},
+      );
 
-    if (response.statusCode != 201) {
+      if (response.statusCode != 201) {
+        final jsonBody = jsonDecode(response.body);
+        final message = jsonBody["errors"][0];
+        return AuthError(message);
+      }
+
       final jsonBody = jsonDecode(response.body);
-      final message = jsonBody["errors"][0];
-      return AuthError(message);
+      final accessToken = jsonBody["data"]["accessToken"];
+
+      _controller.add(
+        Authenticated(
+          accessToken: accessToken,
+          username: username,
+        ),
+      );
+
+      return null;
+    } catch (_) {
+      return AuthError("Hubo un error al registrar al usuario");
     }
-
-    final jsonBody = jsonDecode(response.body);
-    final accessToken = jsonBody["data"]["accessToken"];
-
-    _controller.add(
-      Authenticated(
-        accessToken: accessToken,
-        username: username,
-      ),
-    );
-
-    return null;
   }
 
   @override

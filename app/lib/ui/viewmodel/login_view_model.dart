@@ -21,24 +21,40 @@ final class OnPasswordChanged extends LoginEvent {
 
 final class OnLogin extends LoginEvent {}
 
+enum LoginStatus {
+  initial,
+  loading,
+  success,
+  error,
+}
+
 final class LoginState {
   String username;
   String password;
+  LoginStatus status;
 
   LoginState({
     required this.username,
     required this.password,
+    required this.status,
   });
 
   factory LoginState.empty() => LoginState(
         username: "",
         password: "",
+        status: LoginStatus.initial,
       );
 
-  LoginState copyWith({String? username, String? password, String? error}) =>
+  LoginState copyWith({
+    String? username,
+    String? password,
+    String? error,
+    LoginStatus? status,
+  }) =>
       LoginState(
         username: username ?? this.username,
         password: password ?? this.password,
+        status: status ?? this.status,
       );
 }
 
@@ -58,6 +74,8 @@ final class LoginViewModel extends Bloc<LoginEvent, LoginState> {
   }
 
   FutureOr<void> _onLogin(OnLogin evt, Emitter<LoginState> emit) async {
+    emit(state.copyWith(status: LoginStatus.loading));
+
     final result = await _loginUseCase(
       state.username,
       state.password,
@@ -66,8 +84,9 @@ final class LoginViewModel extends Bloc<LoginEvent, LoginState> {
     switch (result) {
       case Left(value: var loginError):
         _errors.add(loginError.message);
-      case Right(value: var accessToken):
-        print(accessToken);
+        emit(state.copyWith(status: LoginStatus.error));
+      case Right():
+        emit(state.copyWith(status: LoginStatus.success));
     }
   }
 
