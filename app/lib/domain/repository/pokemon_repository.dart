@@ -7,4 +7,10 @@ abstract class PokemonRepository {
   Future<void> loadPokemon();
 
   Future<PokemonDetails> getPokemonDetails(String name);
+
+  Stream<List<Pokemon>> get favoritePokemon;
+
+  Future<bool> loadFavoritePokemon();
+
+  Future<void> saveFavoritePokemon(int pokemonId);
 }

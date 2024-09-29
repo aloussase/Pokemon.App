@@ -10,6 +10,7 @@ import './ui/viewmodel/auth_view_model.dart';
 import './ui/viewmodel/login_view_model.dart';
 import './ui/viewmodel/register_view_model.dart';
 import './ui/viewmodel/snackbar_view_model.dart';
+import 'domain/repository/authentication_token_holder.dart';
 
 void main() {
   di.setup();
@@ -74,11 +75,13 @@ final class _PokemonAppViewState extends State<PokemonAppView> {
           listener: (context, state) {
             switch (state) {
               case Authenticated():
+                AuthenticationTokenHolder.the().token = state.accessToken;
                 _navigator.pushAndRemoveUntil(
                   MaterialPageRoute(builder: (_) => const HomePage()),
                   (route) => false,
                 );
               case Unauthenticated():
+                AuthenticationTokenHolder.the().token = null;
                 _navigator.pushAndRemoveUntil(
                   MaterialPageRoute(
                     builder: (_) => LoginPage(navigator: _navigator),

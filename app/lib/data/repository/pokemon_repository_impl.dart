@@ -7,6 +7,7 @@ import 'package:http/http.dart';
 import '../../domain/models/pokemon.dart';
 import '../../domain/models/pokemon_details.dart';
 import '../../domain/models/pokemon_stat.dart';
+import '../../domain/repository/authentication_token_holder.dart';
 import '../../domain/repository/pokemon_repository.dart';
 
 final class PokemonRepositoryImpl extends PokemonRepository {
@@ -163,5 +164,47 @@ final class PokemonRepositoryImpl extends PokemonRepository {
     } catch (_) {
       return null;
     }
+  }
+
+  static const API_BASE_URL = "http://192.168.18.6:3000";
+
+  final _favoriteController = StreamController<List<Pokemon>>.broadcast();
+
+  @override
+  Stream<List<Pokemon>> get favoritePokemon => _favoriteController.stream;
+
+  @override
+  Future<bool> loadFavoritePokemon() async {
+    final accessToken = AuthenticationTokenHolder.the().token;
+    if (accessToken == null) {
+      return false;
+    }
+
+    final response = await _client.get(
+      Uri.parse("$API_BASE_URL/api/pokemon"),
+      headers: {
+        'Authorization': 'Bearer $accessToken',
+      },
+    );
+
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      return false;
+    }
+
+    final json = jsonDecode(response.body);
+    final List<dynamic> jsonList = json["data"];
+
+    final pokemon =
+        jsonList.map((p) => Pokemon(p["name"], p["imageUrl"])).toList();
+
+    _favoriteController.add(pokemon);
+
+    return true;
+  }
+
+  @override
+  Future<void> saveFavoritePokemon(int pokemonId) {
+    // TODO: implement saveFavoritePokemon
+    throw UnimplementedError();
   }
 }

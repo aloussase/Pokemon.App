@@ -19,6 +19,8 @@ class PokemonListView extends StatelessWidget {
       padding: const EdgeInsets.all(8),
       child: Scrollbar(
         child: ListView(
+          shrinkWrap: true,
+          scrollDirection: Axis.vertical,
           children: [
             if (pokemon.isEmpty)
               Center(
