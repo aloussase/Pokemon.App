@@ -39,7 +39,7 @@ npm run build
 node build/index.js
 ```
 
-> **Note**
+> [!IMPORTANT]
 > Para que todo funcione correctamente, deberá hacer una copia del archivo
 > `.env.example` y llamarlo `.env`. En este archivo deberá configurar las
 > variables de entorno según sea apropiado.
@@ -49,7 +49,7 @@ valores por defecto.
 
 ### Aplicación Móvil
 
-> **Note**
+> [!NOTE]
 > Estas instrucciones son para dispositivos Android.
 
 La aplicación móvil se encuentra en el directorio `app`, por lo que se asume que
