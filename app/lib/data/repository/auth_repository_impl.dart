@@ -4,16 +4,12 @@ import 'dart:convert';
 import 'package:fpdart/fpdart.dart';
 import 'package:http/http.dart';
 
+import '../../config.dart';
 import '../../domain/repository/auth_repository.dart';
 
 final class AuthRepositoryImpl implements AuthRepository {
   final Client _client;
   final _controller = StreamController<AuthState>();
-
-  // TODO: Move this to a configuration object.
-  static const API_BASE = "http://192.168.18.6:3000";
-
-  // static const API_BASE = "http://192.168.60.251:3000";
 
   AuthRepositoryImpl({required Client httpClient}) : _client = httpClient;
 
@@ -21,7 +17,7 @@ final class AuthRepositoryImpl implements AuthRepository {
   Future<Either<AuthError, String>> login(
       String username, String password) async {
     final response = await _client.post(
-      Uri.parse("$API_BASE/api/login"),
+      Uri.parse("${Config.API_BASE_URL}/api/login"),
       body: jsonEncode(
         {
           "username": username,
@@ -53,7 +49,7 @@ final class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<AuthError?> register(String username, String password) async {
     final response = await _client.post(
-      Uri.parse("$API_BASE/api/register"),
+      Uri.parse("${Config.API_BASE_URL}/api/register"),
       body: jsonEncode(
         {
           "username": username,

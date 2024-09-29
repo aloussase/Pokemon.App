@@ -4,6 +4,7 @@ import 'dart:math';
 
 import 'package:http/http.dart';
 
+import '../../config.dart';
 import '../../domain/models/pokemon.dart';
 import '../../domain/models/pokemon_details.dart';
 import '../../domain/models/pokemon_stat.dart';
@@ -167,8 +168,6 @@ final class PokemonRepositoryImpl extends PokemonRepository {
     }
   }
 
-  static const API_BASE_URL = "http://192.168.18.6:3000";
-
   final _favoriteController = StreamController<List<Pokemon>>.broadcast();
 
   @override
@@ -182,7 +181,7 @@ final class PokemonRepositoryImpl extends PokemonRepository {
     }
 
     final response = await _client.get(
-      Uri.parse("$API_BASE_URL/api/pokemon"),
+      Uri.parse("${Config.API_BASE_URL}/api/pokemon"),
       headers: {
         'Authorization': 'Bearer $accessToken',
       },
@@ -211,7 +210,7 @@ final class PokemonRepositoryImpl extends PokemonRepository {
     }
 
     final response = await _client.post(
-      Uri.parse("$API_BASE_URL/api/pokemon"),
+      Uri.parse("${Config.API_BASE_URL}/api/pokemon"),
       headers: {
         'Authorization': 'Bearer $accessToken',
         'Content-Type': 'application/json'
